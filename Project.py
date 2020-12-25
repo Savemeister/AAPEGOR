@@ -1,6 +1,5 @@
 import random
 
-
 def MillerRabin(num, repeat = 5):
     """
     Функция вызывается в isPrime()
@@ -73,7 +72,7 @@ def isPrime(num):
 
 
 def GeneratingBigPrime(keysize = 1024):
-    # Возвращает простое число заданного размера бит.
+    "Возвращает простое число заданного размера бит."
     while 1:
         num = random.getrandbits(keysize)
         if isPrime(num):
@@ -81,6 +80,7 @@ def GeneratingBigPrime(keysize = 1024):
 
 
 def CoprimeTest(z,E): # Тест на простоту
+    ''' Проверяет взаимно ли простые два принимаемых функцией на основе алгоритма Евклида'''
     while z != 0 and E != 0:
         if z > E:
             z %= E
@@ -92,26 +92,25 @@ def CoprimeTest(z,E): # Тест на простоту
         return False
 
 def GeneratingE(z): # Генерация E
+    '''Подбирает число E, проверяя взаимно ли простое оно с помощью функции CoprimeTest'''
     while 1:
         E = random.randint(1_000_000_000, 100_000_000_000)
         if CoprimeTest(z, E) == True:
             return E
 
-"""
-Непростой момент в этой программе. Встала
-проблема, как преобразовать слова в цифру.
-Причём, нужно чтобы получилось не несколько цифр,
-отвечающих за каждую букву. А одна цифра, отвечающая
-за всё слово целиком. Ведь несколько цифр передавать,
-это слишком много данных. И к тому же, это уменьшает
-криптографическую стойкость. Ведь будут одинаковые
-цифры отвечающие за одинаковые буквы. И можно будет угадать,
-какая за какую.
-
-Было придуманно разбить численные представления букв Юникода
-по 4 цифры. Добовляя в начале трёх и менее значных чисел нули.
-"""
 def Encryption(message): # Шифрование
+    """Непростой момент в этой программе. Встала
+    проблема, как преобразовать слова в цифру.
+    Причём, нужно чтобы получилось не несколько цифр,
+    отвечающих за каждую букву. А одна цифра, отвечающая
+    за всё слово целиком. Ведь несколько цифр передавать,
+    это слишком много данных. И к тому же, это уменьшает
+    криптографическую стойкость. Ведь будут одинаковые
+    цифры отвечающие за одинаковые буквы. И можно будет угадать,
+    какая за какую отвечает.
+    Было придуманно разбить численные представления букв Юникода
+    по 4 цифры. Добовляя в начале трёх и менее значных чисел нули.
+    """
     emessage = ""
     for i in message:
         i = str(ord(i))
@@ -131,6 +130,7 @@ def Encryption(message): # Шифрование
 
 
 def Decryption(emessage): # Дешифрование
+    '''Дешифрует полученное сообщение, '''
     emessage = str(pow(emessage, D, n))
     emessage = emessage[1:]
     # Удаляем в начале, добаленную нами ранее,
@@ -155,10 +155,12 @@ def Decryption(emessage): # Дешифрование
     
 
 def GeneratingD(E, z): # Генерация D
+    '''Подбирает число D, такое что E*D mod z == 1'''
     D = pow(E, -1, z)
     return D
 
 def newkeys(): # Генерация новых ключей
+    ''' Генерирует все ключ, используя раннее задукоментированные функции'''
     p, q = GeneratingBigPrime(), GeneratingBigPrime()
     z = (p-1) * (q-1)
     n = p * q
@@ -203,62 +205,63 @@ def PrivateOpenKeyReading():
         E = int(t.readline().strip()[4:])
         return n, E
 
-
-print("Приветствую, я реализация алгоритма RSA")
-while 1:
-    que1 = input("Что вы хотите сделать? \nЗашифровать сообщение(Введите з) или Дешифровать(Введите д) или же просто Сгенирировать ключи(Введите г): \n").lower()
-    if que1 == "г" or que1 == "g":
-        print("Генерация ключей.....")
-        n, E, D, p, q = newkeys()
-        print("n = " + str(n) + "\n" +
-                "E = " + str(E) + "\n" +
-                "D = " + str(D) + "\n" +
-                "p = " + str(p) + "\n" +
-                "q = " + str(q) + "\n")
-        que4 = input("\nСохранить ключи? д/н\n")
-        if que4 == "д":
-            PrivateKeyRecording(n, E, D, p, q)
-        que4 = input("\nСохранить ключи отдельно только открытые ключи? д/н\n")
-        if que4 == "д":
-            PublicKeyRecording(n, E)
-        input()
-
-    elif que1 == 'е' or que1 == 'e' or que1 == 'з':
-        que2 = input("Вы хотите зашифровать сообщение с помощью ключей из файла(ф) \nили хотите ввести ключи в ручную(р)?\n").lower()
-        if que2 == 'ф' or que2 == 'f':
-            n, E = PrivateOpenKeyReading()
-            message = input("Введите сообщение: ")
-            emessage = Encryption(message)
-            print("Зашифрованное сообщение: " + str(emessage))
+if __name__ == '__main__':
+    print("Приветствую, я реализация алгоритма RSA")
+    while 1:
+        que1 = input("Что вы хотите сделать? \nЗашифровать сообщение(Введите з) или Дешифровать(Введите д) или же просто Сгенирировать ключи(Введите г): \n").lower()
+        if que1 == "г" or que1 == "g":
+            print("Генерация ключей.....")
+            n, E, D, p, q = newkeys()
+            print("n = " + str(n) + "\n" +
+                    "E = " + str(E) + "\n" +
+                    "D = " + str(D) + "\n" +
+                    "p = " + str(p) + "\n" +
+                    "q = " + str(q) + "\n")
+            que4 = input("\nСохранить ключи? д/н\n")
+            if que4 == "д":
+                PrivateKeyRecording(n, E, D, p, q)
+            que4 = input("\nСохранить ключи отдельно только открытые ключи? д/н\n")
+            if que4 == "д":
+                PublicKeyRecording(n, E)
             input()
-        elif que3 == "p" or que3 == "r" or que3 == "р":
-            n = int(input("n = "))
-            E = int(input("E = "))
-            message = input("Введите сообщение: ")
-            emessage = Encryption(message)
-            print("Зашифрованное сообщение: " + str(emessage))
-            input()
+
+        elif que1 == 'е' or que1 == 'e' or que1 == 'з':
+            que2 = input("Вы хотите зашифровать сообщение с помощью ключей из файла(ф) \nили хотите ввести ключи в ручную(р)?\n").lower()
+            if que2 == 'ф' or que2 == 'f':
+                n, E = PrivateOpenKeyReading()
+                message = input("Введите сообщение: ")
+                emessage = Encryption(message)
+                print("Зашифрованное сообщение: " + str(emessage))
+                input()
+            elif que2 == "p" or que2 == "r" or que2 == "р":
+                n = int(input("n = "))
+                E = int(input("E = "))
+                message = input("Введите сообщение: ")
+                emessage = Encryption(message)
+                print("Зашифрованное сообщение: " + str(emessage))
+                input()
+            else:
+                continue
+        elif que1 == "д" or que2 == 'd':
+            que3 = input("Вы хотите дешифровать сообщение с помощью ключей из файла(ф) или хотите ввести ключи в ручную(р)?\n").lower()
+            if que3 == "ф" or que3 == "f":
+                n, E, D, p, q = PrivateKeyReading()
+                emessage = int(input("Введите шифр: "))
+                demessage = Decryption(emessage)
+                print("Дешифрованное сообщение: " + str(demessage))
+                input()
+            elif que3 == "p" or que3 == "r" or que3 == "р":
+                D = int(input("D = "))
+                n = int(input("n = "))
+                emessage = int(input("Введите шифр: "))
+                demessage = Decryption(emessage)
+                print("Дешифрованное сообщение: " + str(demessage))
+                input()
+            
+            else:
+                continue
         else:
             continue
-    elif que1 == "д" or que2 == 'd':
-        que3 = input("Вы хотите дешифровать сообщение с помощью ключей из файла(ф) или хотите ввести ключи в ручную(р)?\n").lower()
-        if que3 == "ф" or que3 == "f":
-            n, E, D, p, q = PrivateKeyReading()
-            emessage = int(input("Введите шифр: "))
-            demessage = Decryption(emessage)
-            print("Дешифрованное сообщение: " + str(demessage))
-            input()
-        elif que3 == "p" or que3 == "r" or que3 == "р":
-            D = int(input("D = "))
-            n = int(input("n = "))
-            emessage = int(input("Введите шифр: "))
-            demessage = Decryption(emessage)
-            print("Дешифрованное сообщение: " + str(demessage))
-            input()
-        else:
-            continue
-    else:
-        continue
 
 
     
